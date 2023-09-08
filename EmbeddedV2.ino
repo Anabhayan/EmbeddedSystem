@@ -50,10 +50,6 @@ void loop() {
 
   prevError = error;
 
-  if (error < 0) {
-    pwmOutput = 0;
-  }
-
   controlPump(pwmOutput);
 
   Serial.print("Error: ");
@@ -63,7 +59,6 @@ void loop() {
   Serial.print(" Distance: ");
   Serial.println(distance);
 
-  delay(100);
 }
 
 float measureDistance() {
