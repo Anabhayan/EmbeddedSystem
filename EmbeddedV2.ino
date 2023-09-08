@@ -51,9 +51,7 @@ void loop() {
   prevError = error;
 
   controlPump(pwmOutput);
-
-  Serial.print("Error: ");
-  Serial.print(error);
+  
   Serial.print(" Setpoint: ");
   Serial.print(SET_POINT);
   Serial.print(" Distance: ");
@@ -62,7 +60,8 @@ void loop() {
 }
 
 float measureDistance() {
-  float cm = (sonar.ping() / 2.0) * 0.0343;  // Convert ping time to centimeters
+  int iterations = 5;
+  float cm = (sonar.ping median (iterations) / 2) * 0.0343;  // Convert ping time to centimeters
   return cm;
 }
 
