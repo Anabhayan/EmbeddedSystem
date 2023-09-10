@@ -137,6 +137,7 @@ float integral = 0;
 void setup() {
   Serial.begin(9600);
   pinMode(PWM_OUT, OUTPUT);
+  find_height();
 }
 
 void loop() {
