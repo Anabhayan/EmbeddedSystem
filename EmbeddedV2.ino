@@ -1,10 +1,10 @@
-"""
+/*
 Written by Anabhayan September 7th/8th
 Edited by Adhithya September 8th
 
-Core code structure (PID) adapted from CurioRES https://youtu.be/dTGITLnYAY0
-"""
 
+Core code structure (PID) adapted from CurioRES https://youtu.be/dTGITLnYAY0
+*/
 
 template <int order>
 class LowPass{
@@ -87,10 +87,35 @@ class LowPass{
 
 LowPass<2> lp(1,1e3,true);
 
+
 #include <NewPing.h>
 
-const float SET_POINT = 3.0;  // Desired water level in centimeters
+// USER INPUT
+float SET_LEVEL = 200.0;  // Desired water level in millimeters
+
+
+// SET INTIAL VALUES - dependent on shape of container 
 const float USS_POS = 10.19;  // Height of USS from the bottom of the beaker (without water)
+const float POS_ini_100mL = 2;  //Height of intial 100mL from bottom
+const float POS_next_100mL = 1.5;  //Height of the next 100mL from intial 100mL mark
+const float MAX_CAP = 500;  // max capacity of container in mL
+
+float SET_POINT ;
+
+void find_height() {
+SET_LEVEL = constrain(SET_LEVEL, 0, MAX_CAP);
+
+// height of water column for given volume
+if( SET_LEVEL <= 100 ){
+  SET_POINT = (SET_LEVEL / 100.0) * POS_ini_100mL; // 
+}
+else if( SET_LEVEL > 100 ){
+  SET_POINT = POS_ini_100mL + ((SET_LEVEL - 100.0) / 100.0) * POS_next_100mL; // 
+}
+
+}
+
+
 
 // PID constants
 const float KP = 1.0;  // Proportional gain
@@ -119,8 +144,8 @@ void loop() {
   float deltaTime = (float)(currentMicros - prevMicros) / 1.0e6;
   prevMicros = currentMicros;
 
-  distance = USS_POS - measureDistance();
-  distanceFilt = lp.filt(distance);
+  // distance = USS_POS - measureDistance();
+  distance = USS_POS - measureDistance_LPF();
 
   float error = SET_POINT - distance;
   
@@ -136,13 +161,10 @@ void loop() {
 
   controlPump(pwmOutput);
 
-  Serial.print("Error: ");
-  Serial.print(error);
-  Serial.print(" Setpoint: ");
   Serial.print(SET_POINT);
-  Serial.print(" Distance: ");
-  Serial.println(distance);
-
+  Serial.print(" ");
+  Serial.print(distance);
+  Serial.println();
 }
 
 float measureDistance() {
@@ -150,6 +172,26 @@ float measureDistance() {
   return cm;
 }
 
+float measureDistance_LPF() {
+  float cm = lp.filt((sonar.ping() / 2.0) * 0.0343);  // Convert ping time to centimeters
+  return cm;
+}
 void controlPump(int pwm) {
   analogWrite(PWM_OUT, pwm);
 }
+
+// pwm tester
+/*
+#define PWM_OUT 5
+
+void setup() {
+  // put your setup code here, to run once:
+
+}
+void loop() {
+  // put your main code here, to run repeatedly:
+    analogWrite(PWM_OUT, 200);
+
+}
+*/
+
